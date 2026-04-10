@@ -1,0 +1,72 @@
+name: next-shopify-storefront-demo
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Env deploy to"
+        required: false
+        type: choice
+        options: ["development", "production"]
+        default: "development"
+      node_version:
+        description: "Node version"
+        required: false
+        type: choice
+        options: ["lts-alpine", "22-alpine", "24-alpine", "25-alpine"]
+        default: "lts-alpine"
+
+# Stops workflow if there is a newer workflow pending
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  node-ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Parse version
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          MAJOR=${VERSION%%.*}
+          MINOR=${VERSION%.*}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "major=$MAJOR" >> $GITHUB_OUTPUT
+          echo "minor=$MINOR" >> $GITHUB_OUTPUT
+
+      - name: Build Docker Image
+        uses: docker/build-push-action@v7.1.0
+        with:
+          tags: ghcr.io/panik10/next-demo-${{ inputs.environment }}:1.0.0
+          # tags: |
+          #   ghcr.io/panik10/next-demo-${{ inputs.environment }}:$VERSION
+          #   ghcr.io/panik10/next-demo-${{ inputs.environment }}:$MINOR
+          #   ghcr.io/panik10/next-demo-${{ inputs.environment }}:$MAJOR
+          #   ghcr.io/panik10/next-demo-${{ inputs.environment }}:latest
+          push: true
+          # # List of annotation to set to the image
+          # annotations: # optional
+          # # List of attestation parameters (e.g., type=sbom,generator=image)
+          # build-args: # optional
+          # # List of additional build contexts (e.g., name=path)
+          # build-contexts: # optional
+          # # List of metadata for an image
+          # labels: # optional
+          # # List of target platforms for build
+          # platforms: # optional
+          # # Generate SBOM attestation for the build (shorthand for --attest=type=sbom)
+          # sbom: # optional
+          # # List of secrets to expose to the build (e.g., key=string, GIT_AUTH_TOKEN=mytoken)
+          # secrets: # optional
+          # # List of secret env vars to expose to the build (e.g., key=envname, MY_SECRET=MY_ENV_VAR)
+          # secret-envs: # optional
+          # # List of secret files to expose to the build (e.g., key=filename, MY_SECRET=./secret.txt)
+          # secret-files: # optional
+          # # Size of /dev/shm (e.g., 2g)
+
+          # # Sets the target stage to build
+          # target: # optional
