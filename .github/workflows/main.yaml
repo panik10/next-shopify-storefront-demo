@@ -57,14 +57,20 @@ jobs:
         with:
           tags: |
             ghcr.io/${{ github.repository }}-${{ inputs.environment }}:${{ steps.version.outputs.major }}
+            ghcr.io/${{ github.repository }}-${{ inputs.environment }}:${{ steps.version.outputs.major }}-${{ inputs.node_version }}
             ghcr.io/${{ github.repository }}-${{ inputs.environment }}:${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }}
+            ghcr.io/${{ github.repository }}-${{ inputs.environment }}:${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }}-${{ inputs.node_version }}
             ghcr.io/${{ github.repository }}-${{ inputs.environment }}:${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }}.${{ steps.version.outputs.patch }}
+            ghcr.io/${{ github.repository }}-${{ inputs.environment }}:${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }}.${{ steps.version.outputs.patch }}-${{ inputs.node_version }}
             ghcr.io/${{ github.repository }}-${{ inputs.environment }}:latest
             ghcr.io/${{ github.repository }}-${{ inputs.environment }}:${{ github.sha }}
           push: true
           # List of metadata for an image
           labels: |
-            org.opencontainers.image.source: "ghcr.io/${{ github.repository }}"
+            org.opencontainers.image.source "ghcr.io/${{ github.repository }}"
+            org.opencontainers.image.version "${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }}.${{ steps.version.outputs.patch }}"
+            com.panik.sha "${{ github.sha }}"
+
           # # List of annotation to set to the image
           # annotations: # optional
           # # List of attestation parameters (e.g., type=sbom,generator=image)
