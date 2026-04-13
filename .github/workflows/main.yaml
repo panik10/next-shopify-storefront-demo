@@ -60,15 +60,17 @@ jobs:
             ghcr.io/${{ github.repository }}-${{ inputs.environment }}:${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }}
             ghcr.io/${{ github.repository }}-${{ inputs.environment }}:${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }}.${{ steps.version.outputs.patch }}
             ghcr.io/${{ github.repository }}-${{ inputs.environment }}:latest
+            ghcr.io/${{ github.repository }}-${{ inputs.environment }}:${{ github.sha }}
           push: true
+          # List of metadata for an image
+          labels: |
+            org.opencontainers.image.source: "ghcr.io/${{ github.repository }}"
           # # List of annotation to set to the image
           # annotations: # optional
           # # List of attestation parameters (e.g., type=sbom,generator=image)
           # build-args: # optional
           # # List of additional build contexts (e.g., name=path)
           # build-contexts: # optional
-          # # List of metadata for an image
-          # labels: # optional
           # # List of target platforms for build
           # platforms: # optional
           # # Generate SBOM attestation for the build (shorthand for --attest=type=sbom)
@@ -80,4 +82,4 @@ jobs:
           # # List of secret files to expose to the build (e.g., key=filename, MY_SECRET=./secret.txt)
           # secret-files: # optional
           # # Sets the target stage to build
-          # target: # optional
+          target: ${{ inputs.environment }}
