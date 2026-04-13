@@ -47,9 +47,9 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}-${{ inputs.environment }}
           tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
+            type=raw,pattern={{version}}
+            type=raw,pattern={{major}}.{{minor}}
+            type=raw,pattern={{major}}
             type=raw,value=latest
 
       - name: Build Docker Image
@@ -57,7 +57,9 @@ jobs:
         with:
           tags: ${{ steps.meta.outputs.tags }}
           push: true
-          labels: ${{ steps.meta.outputs.labels }}
+          labels: |
+            com.panik.sha=${{ github.sha }}
+            ${{ steps.meta.outputs.labels }}
           # List of metadata for an image
           # labels: |
           #   org.opencontainers.image.source "ghcr.io/${{ github.repository }}"
