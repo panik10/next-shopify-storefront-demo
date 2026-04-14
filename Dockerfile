@@ -1,4 +1,4 @@
-# -- Base stage --
+### -- Base stage --
 ARG NODE_VERSION=lts-alpine
 FROM node:${NODE_VERSION} AS base
 
@@ -7,7 +7,7 @@ WORKDIR /app
 RUN chown -R node:node /app
 RUN npm install -g pnpm
 
-# -- Dependencies stage --
+### -- Dependencies stage --
 FROM base AS deps
 
 # Install production dependencies
@@ -15,14 +15,14 @@ COPY --chown=node:node package*.json ./
 
 RUN pnpm install --prod
 
-# -- Build dependencies --
+### -- Build dependencies --
 FROM deps AS build-deps
 
 RUN pnpm install
 
 COPY --chown=node:node package*.json ./
 
-# -- Build Stage -- 
+### -- Build Stage -- 
 FROM build-deps AS build
 
 COPY --chown=node:node . .
@@ -31,7 +31,7 @@ RUN pnpm run build
 
 RUN chown -R node:node /app
 
-# -- Dev stage --
+### -- Dev stage --
 FROM build AS development
 
 ENV NODE_ENV=development \
@@ -42,9 +42,11 @@ COPY --chown=node:node . .
 # Switch to non-root user
 USER node
 
+LABEL com.my-cool-aid-company.developer.name="panik10"
+
 ENTRYPOINT [ "pnpm", "run", "dev" ]
 
-# -- Prod stage --
+### -- Prod stage --
 ARG NODE_VERSION=24.11.1-alpine
 FROM node:${NODE_VERSION} AS production
 
@@ -64,7 +66,7 @@ EXPOSE 3000
 
 ENTRYPOINT ["pnpm", "start"]
 
-# -- Test stage --
+### -- Test stage --
 FROM build-deps AS test
 
 ENV NODE_ENV=test
