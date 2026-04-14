@@ -11,7 +11,7 @@ on:
         required: false
         type: choice
         options: ["development", "production"]
-        default: "development"
+        # default: "development"
       nodejs_version:
         description: "Node version"
         required: false
