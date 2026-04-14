@@ -27,9 +27,7 @@ FROM build-deps AS build
 
 COPY --chown=node:node . .
 RUN --mount=type=secret,id=DOT_ENV,target=/app/.env \
-    pnpm run build
-
-RUN pnpm run build
+    ls -la /app/.env && pnpm run build
 
 RUN chown -R node:node /app
 
@@ -70,7 +68,7 @@ USER node
 
 EXPOSE 3000
 
-ENTRYPOINT ["pnpm", "start"]
+ENTRYPOINT ["node", "./node_modules/next/dist/bin/next", "start"]
 
 ### -- Test stage --
 FROM build-deps AS test

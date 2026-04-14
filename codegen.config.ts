@@ -5,11 +5,12 @@ const config: CodegenConfig = {
   overwrite: true,
   ignoreNoDocuments: true,
   documents: ["./src/**/*.{ts,tsx}"],
-  schema: {
-    [getStorefrontApiUrl()]: {
-      headers: getPublicTokenHeaders(),
-    },
-  },
+  // schema: {
+  //   [getStorefrontApiUrl()]: {
+  //     headers: getPublicTokenHeaders(),
+  //   },
+  // },
+  schema: "./src/lib/graphql/schema.gql",
   generates: {
     ["./src/lib/graphql/"]: {
       preset: "client",
