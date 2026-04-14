@@ -1,6 +1,9 @@
 name: next-shopify-storefront-demo
 
 on:
+  push:
+    tags:
+      - "v*"
   workflow_dispatch:
     inputs:
       environment:
