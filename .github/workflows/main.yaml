@@ -72,42 +72,43 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
-      # - name: Docker metadata
-      #   id: meta
-      #   uses: docker/metadata-action@v5
-      #   with:
-      #     images: ghcr.io/${{ github.repository }}-${{ env.SELECTED_ENV }}
-      # tags: |
-      #   type=semver,pattern={{version}}
-      #   type=semver,pattern={{major}}.{{minor}}
-      #   type=semver,pattern={{major}}
-      #   type=raw,value=latest
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}-${{ env.SELECTED_ENV }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest
 
+      # tags: |
+      #   ghcr.io/${{ github.repository }}-${{ env.SELECTED_ENV }}:${{ steps.version.outputs.major }}
+      #   ghcr.io/${{ github.repository }}-${{ env.SELECTED_ENV }}:${{ steps.version.outputs.major }}-${{ inputs.node_version }}
+      #   ghcr.io/${{ github.repository }}-${{ env.SELECTED_ENV }}:${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }}
+      #   ghcr.io/${{ github.repository }}-${{ env.SELECTED_ENV }}:${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }}-${{ inputs.node_version }}
+      #   ghcr.io/${{ github.repository }}-${{ env.SELECTED_ENV }}:${{ steps.version.outputs.version }}
+      #   ghcr.io/${{ github.repository }}-${{ env.SELECTED_ENV }}:${{ steps.version.outputs.version }}-${{ inputs.node_version }}
+      #   ghcr.io/${{ github.repository }}-${{ env.SELECTED_ENV }}:latest
+      #   ghcr.io/${{ github.repository }}-${{ env.SELECTED_ENV }}:${{ github.sha }}
       - name: Build Docker Image
         uses: docker/build-push-action@v7.1.0
         with:
-          tags: |
-            ghcr.io/${{ github.repository }}-${{ env.SELECTED_ENV }}:${{ steps.version.outputs.major }}
-            ghcr.io/${{ github.repository }}-${{ env.SELECTED_ENV }}:${{ steps.version.outputs.major }}-${{ inputs.node_version }}
-            ghcr.io/${{ github.repository }}-${{ env.SELECTED_ENV }}:${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }}
-            ghcr.io/${{ github.repository }}-${{ env.SELECTED_ENV }}:${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }}-${{ inputs.node_version }}
-            ghcr.io/${{ github.repository }}-${{ env.SELECTED_ENV }}:${{ steps.version.outputs.version }}
-            ghcr.io/${{ github.repository }}-${{ env.SELECTED_ENV }}:${{ steps.version.outputs.version }}-${{ inputs.node_version }}
-            ghcr.io/${{ github.repository }}-${{ env.SELECTED_ENV }}:latest
-            ghcr.io/${{ github.repository }}-${{ env.SELECTED_ENV }}:${{ github.sha }}
-          # tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ steps.meta.outputs.tags }}
           push: true
+          target: ${{ env.SELECTED_ENV }}
           labels: |
             com.my-cool-aid-company.developer="Developed by SeaSideSoftwares https://seasidesoftwares.com/"
-            org.opencontainers.image.url=${{ github.repositoryUrl }}
-            org.opencontainers.image.title=${{ github.repository }}
-            org.opencontainers.image.revision=${{ github.sha }}
-            org.opencontainers.image.created=${{ steps.date.outputs.date }}
-            org.opencontainers.image.version=${{ steps.version.outputs.version }}
-            org.opencontainers.image.description=${{ github.event.repository.description || 'Visit https://my-cool-aid-company.com/ for details' }}
-            org.opencontainers.image.source=${{ github.repositoryUrl}}
+            ${{ steps.meta.outputs.labels }}
+          # org.opencontainers.image.url=${{ github.repositoryUrl }}
+          # org.opencontainers.image.title=${{ github.repository }}
+          # org.opencontainers.image.revision=${{ github.sha }}
+          # org.opencontainers.image.created=${{ steps.date.outputs.date }}
+          # org.opencontainers.image.version=${{ steps.version.outputs.version }}
+          # org.opencontainers.image.description=${{ github.event.repository.description || 'Visit https://my-cool-aid-company.com/ for details' }}
+          # org.opencontainers.image.source=${{ github.repositoryUrl}}
 
-          # ${{ steps.meta.outputs.labels }}
           # List of metadata for an image
           # labels: |
           #   org.opencontainers.image.source "ghcr.io/${{ github.repository }}"
@@ -131,4 +132,3 @@ jobs:
           # # List of secret files to expose to the build (e.g., key=filename, MY_SECRET=./secret.txt)
           # secret-files: # optional
           # # Sets the target stage to build
-          target: ${{ env.SELECTED_ENV }}
