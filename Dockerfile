@@ -54,6 +54,8 @@ FROM node:${NODE_VERSION} AS production
 WORKDIR /app
 RUN chown -R node:node /app
 
+RUN npm install -g pnpm
+
 ENV NODE_ENV=production \
     NODE_OPTIONS="--max-old-space-size=256 --no-warnings" \
     NPM_CONFIG_LOGLEVEL=silent
@@ -62,6 +64,7 @@ COPY --from=deps --chown=node:node /app/package*.json ./
 COPY --from=deps --chown=node:node /app/node_modules ./node_modules
 COPY --from=build --chown=node:node /app/.next ./.next
 COPY --from=build --chown=node:node /app/public ./public
+COPY --from=build --chown=node:node /app/next.config.mjs ./
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
 
@@ -70,7 +73,7 @@ USER node
 
 EXPOSE 3000
 
-ENTRYPOINT ["pnpm", "start"]
+ENTRYPOINT ["pnpm", "run" "start"]
 
 ### -- Test stage --
 FROM build-deps AS test
