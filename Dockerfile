@@ -26,6 +26,8 @@ COPY --chown=node:node package*.json ./
 FROM build-deps AS build
 
 COPY --chown=node:node . .
+RUN --mount=type=secret,id=DOT_ENV,target=/app/.env \
+    pnpm run build
 
 RUN pnpm run build
 
@@ -47,7 +49,6 @@ LABEL com.my-cool-aid-company.developer.name="panik10"
 ENTRYPOINT [ "pnpm", "run", "dev" ]
 
 ### -- Prod stage --
-ARG NODE_VERSION=24.11.1-alpine
 FROM node:${NODE_VERSION} AS production
 
 WORKDIR /app
@@ -59,7 +60,12 @@ ENV NODE_ENV=production \
 
 COPY --from=deps --chown=node:node /app/package*.json ./
 COPY --from=deps --chown=node:node /app/node_modules ./node_modules
+COPY --from=build --chown=node:node /app/.next ./.next
+COPY --from=build --chown=node:node /app/public ./public
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
 
+# Switch to non-root user
 USER node
 
 EXPOSE 3000

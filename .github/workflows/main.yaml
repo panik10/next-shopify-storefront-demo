@@ -92,6 +92,8 @@ jobs:
           labels: |
             com.my-cool-aid-company.developer="Developed by SeaSideSoftwares https://seasidesoftwares.com/"
             ${{ steps.meta.outputs.labels }}
+          secrets: |
+            "DOT_ENV=${{ secrets.DOT_ENV }}"
 
           # Saved for demonstration purposes
           # tags: |
