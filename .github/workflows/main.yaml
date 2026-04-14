@@ -1,9 +1,9 @@
 name: next-shopify-storefront-demo
 
 on:
-  push:
-    tags:
-      - "v*"
+  # push:
+  #   tags:
+  #     - "v*"
   workflow_dispatch:
     inputs:
       environment:
@@ -44,30 +44,41 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
-      - name: Get version from git tag
-        id: git_version
+      - name: Extract version from tag
+        id: version-extract
+        uses: damienaicheh/extract-version-from-tag-action@v1.3.0
+
+      - name: Set outputs
+        id: version
         run: |
-          TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-          VERSION=${TAG#v}
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Found version: $VERSION"
+          echo "major=$MAJOR" >> $GITHUB_OUTPUT
+          echo "minor=$MINOR" >> $GITHUB_OUTPUT
+          echo "patch=$PATCH" >> $GITHUB_OUTPUT
 
       - name: Docker metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
-          context: git
           images: ghcr.io/${{ github.repository }}-${{ inputs.environment }}
-          tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=raw,value=latest
+          # tags: |
+          #   type=semver,pattern={{version}}
+          #   type=semver,pattern={{major}}.{{minor}}
+          #   type=semver,pattern={{major}}
+          #   type=raw,value=latest
 
       - name: Build Docker Image
         uses: docker/build-push-action@v7.1.0
         with:
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: |
+            ghcr.io/${{ github.repository }}-${{ inputs.environment }}:${{ steps.version.outputs.major }}
+            ghcr.io/${{ github.repository }}-${{ inputs.environment }}:${{ steps.version.outputs.major }}-${{ inputs.node_version }}
+            ghcr.io/${{ github.repository }}-${{ inputs.environment }}:${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }}
+            ghcr.io/${{ github.repository }}-${{ inputs.environment }}:${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }}-${{ inputs.node_version }}
+            ghcr.io/${{ github.repository }}-${{ inputs.environment }}:${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }}.${{ steps.version.outputs.patch }}
+            ghcr.io/${{ github.repository }}-${{ inputs.environment }}:${{ steps.version.outputs.major }}.${{ steps.version.outputs.minor }}.${{ steps.version.outputs.patch }}-${{ inputs.node_version }}
+            ghcr.io/${{ github.repository }}-${{ inputs.environment }}:latest
+            ghcr.io/${{ github.repository }}-${{ inputs.environment }}:${{ github.sha }}
+          # tags: ${{ steps.meta.outputs.tags }}
           push: true
           labels: |
             com.panik.sha=${{ github.sha }}
